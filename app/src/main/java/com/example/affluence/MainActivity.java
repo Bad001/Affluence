@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -26,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(getApplicationContext(),"Permissions allowed",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"Permission allowed",Toast.LENGTH_SHORT).show();
         }
         else {
             Intent intent = new Intent(this, InformActivity.class);
