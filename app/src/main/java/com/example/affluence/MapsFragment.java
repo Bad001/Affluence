@@ -3,18 +3,29 @@ package com.example.affluence;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsFragment extends Fragment {
+public class MapsFragment extends Fragment implements LocationListener {
+
+    private GoogleMap mMap;
+    private LatLng position;
+    private Marker lastPosition;
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
@@ -29,9 +40,12 @@ public class MapsFragment extends Fragment {
          */
         @Override
         public void onMapReady(GoogleMap googleMap) {
-            LatLng sydney = new LatLng(-34, 151);
+            /*LatLng sydney = new LatLng(-34, 151);
             googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
+            mMap = googleMap;
+            mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+            mMap.setMyLocationEnabled(true);
         }
     };
 
@@ -51,5 +65,36 @@ public class MapsFragment extends Fragment {
         if (mapFragment != null) {
             mapFragment.getMapAsync(callback);
         }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        position = new LatLng(location.getLatitude(),location.getLongitude());
+        if (lastPosition != null) {
+            lastPosition.remove();
+        }
+        // put the marker
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(position);
+        markerOptions.title("Posizione attuale");
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+        lastPosition = mMap.addMarker(markerOptions);
+        // move the marker
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position,11));
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        //
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+        //
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+        //
     }
 }
