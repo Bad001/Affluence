@@ -2,8 +2,12 @@ package com.example.affluence;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
@@ -45,7 +49,9 @@ public class MapsFragment extends Fragment implements LocationListener {
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
             mMap = googleMap;
             mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-            mMap.setMyLocationEnabled(true);
+            if(ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                mMap.setMyLocationEnabled(true);
+            }
         }
     };
 
