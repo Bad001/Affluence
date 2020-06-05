@@ -2,10 +2,8 @@ package com.example.affluence;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -14,8 +12,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -30,6 +26,7 @@ public class MapsFragment extends Fragment implements LocationListener {
     private GoogleMap mMap;
     private LatLng position;
     private Marker lastPosition;
+    private MarkerOptions markerOptions;
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
@@ -44,9 +41,6 @@ public class MapsFragment extends Fragment implements LocationListener {
          */
         @Override
         public void onMapReady(GoogleMap googleMap) {
-            /*LatLng sydney = new LatLng(-34, 151);
-            googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
             mMap = googleMap;
             mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
             if(ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -80,9 +74,9 @@ public class MapsFragment extends Fragment implements LocationListener {
             lastPosition.remove();
         }
         // put the marker
-        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions = new MarkerOptions();
         markerOptions.position(position);
-        markerOptions.title("Posizione attuale");
+        markerOptions.title("Current Position");
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
         lastPosition = mMap.addMarker(markerOptions);
         // move the marker
