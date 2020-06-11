@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -20,6 +21,14 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+
 
 public class MapsFragment extends Fragment implements LocationListener {
 
@@ -27,6 +36,10 @@ public class MapsFragment extends Fragment implements LocationListener {
     private LatLng position;
     private Marker lastPosition;
     private MarkerOptions markerOptions;
+    private FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private DatabaseReference reference = database.getReference().child("Marker");
+    private myMarker marker;
+    private HashMap<String, Object> updatedValues = new HashMap<>();
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
@@ -45,9 +58,28 @@ public class MapsFragment extends Fragment implements LocationListener {
             mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
             if(ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 mMap.setMyLocationEnabled(true);
+                marker = new myMarker(-33.852,151.211);
+                reference.child(marker.getId()).setValue(marker);
             }
         }
     };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                // value = dataSnapshot.getValue(String.class);
+                //Toast.makeText(getActivity().getApplicationContext(), value, Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getActivity().getApplicationContext(), "Failed to read positions", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
     @Nullable
     @Override
@@ -70,6 +102,12 @@ public class MapsFragment extends Fragment implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         position = new LatLng(location.getLatitude(),location.getLongitude());
+        marker.setLatitude(location.getLatitude());
+        marker.setLongitude(location.getLongitude());
+        updatedValues.put("latitude",marker.getLatitude());
+        updatedValues.put("longitude",marker.getLongitude());
+        reference.child(marker.getId()).child(marker.getId()).updateChildren(updatedValues);
+        reference.updateChildren(updatedValues);
         if (lastPosition != null) {
             lastPosition.remove();
         }
