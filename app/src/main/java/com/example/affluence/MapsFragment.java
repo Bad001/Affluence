@@ -5,9 +5,12 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,8 +30,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.HashMap;
-
 
 public class MapsFragment extends Fragment implements LocationListener {
 
@@ -38,8 +39,10 @@ public class MapsFragment extends Fragment implements LocationListener {
     private MarkerOptions markerOptions;
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference reference = database.getReference().child("Marker");
+    private myService service;
     private myMarker marker;
-    private HashMap<String, Object> updatedValues = new HashMap<>();
+    private Intent intent;
+    private Bundle extras;
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
@@ -58,7 +61,10 @@ public class MapsFragment extends Fragment implements LocationListener {
             mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
             if(ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 mMap.setMyLocationEnabled(true);
-                marker = new myMarker(-33.852,151.211);
+                LocationManager locationManager = (LocationManager) getActivity().getSystemService(getContext().LOCATION_SERVICE);
+                Criteria criteria = new Criteria();
+                Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+                marker = new myMarker(location.getLatitude(),location.getLongitude());
                 reference.child(marker.getId()).setValue(marker);
             }
         }
@@ -104,10 +110,9 @@ public class MapsFragment extends Fragment implements LocationListener {
         position = new LatLng(location.getLatitude(),location.getLongitude());
         marker.setLatitude(location.getLatitude());
         marker.setLongitude(location.getLongitude());
-        updatedValues.put("latitude",marker.getLatitude());
-        updatedValues.put("longitude",marker.getLongitude());
-        reference.child(marker.getId()).child(marker.getId()).updateChildren(updatedValues);
-        reference.updateChildren(updatedValues);
+        intent = new Intent(getActivity(), MainActivity.class);
+        //extras.putString("Marker", marker);
+        getActivity().startService(new Intent(getActivity(),myService.class));
         if (lastPosition != null) {
             lastPosition.remove();
         }
@@ -134,5 +139,17 @@ public class MapsFragment extends Fragment implements LocationListener {
     @Override
     public void onProviderDisabled(String provider) {
         //
+    }
+
+    @Override
+    public void onDestroyView() {
+        reference.child(marker.getId()).removeValue();
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        reference.child(marker.getId()).removeValue();
+        super.onDestroy();
     }
 }
