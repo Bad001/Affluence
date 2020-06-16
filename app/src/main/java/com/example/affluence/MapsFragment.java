@@ -34,9 +34,9 @@ import com.google.firebase.database.ValueEventListener;
 public class MapsFragment extends Fragment implements LocationListener {
 
     private GoogleMap mMap;
-    private LatLng position;
-    private Marker lastPosition;
-    private MarkerOptions markerOptions;
+    private LatLng position, otherPositions;
+    private Marker lastPosition, lastOtherPositions;
+    private MarkerOptions markerOptions, otherMarkersOptions;
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference reference = database.getReference().child("Marker");
     private myService service;
@@ -76,9 +76,23 @@ public class MapsFragment extends Fragment implements LocationListener {
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
+                for(DataSnapshot ds : dataSnapshot.getChildren()) {
+                    if (!ds.child("id").equals(marker.getId())) {
+                        /*
+                        if (lastOtherPositions != null) {
+                            lastOtherPositions.remove();
+                        }
+                        */
+                        otherPositions = new LatLng(ds.child("latitude").getValue(double.class),ds.child("longitude").getValue(double.class));
+                        otherMarkersOptions = new MarkerOptions();
+                        otherMarkersOptions.position(otherPositions);
+                        otherMarkersOptions.title(ds.child("id").getValue(String.class));
+                        otherMarkersOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                        lastOtherPositions = mMap.addMarker(otherMarkersOptions);
+                    }
+                }
                 // value = dataSnapshot.getValue(String.class);
-                //Toast.makeText(getActivity().getApplicationContext(), value, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity().getApplicationContext(), String.valueOf(dataSnapshot.getChildrenCount()), Toast.LENGTH_SHORT).show();
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -111,7 +125,7 @@ public class MapsFragment extends Fragment implements LocationListener {
         marker.setLatitude(location.getLatitude());
         marker.setLongitude(location.getLongitude());
         intent = new Intent(getActivity(), MainActivity.class);
-        //extras.putString("Marker", marker);
+        intent.putExtra("Marker", marker);
         getActivity().startService(new Intent(getActivity(),myService.class));
         if (lastPosition != null) {
             lastPosition.remove();
@@ -120,7 +134,7 @@ public class MapsFragment extends Fragment implements LocationListener {
         markerOptions = new MarkerOptions();
         markerOptions.position(position);
         markerOptions.title("Current Position");
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
         lastPosition = mMap.addMarker(markerOptions);
         // move the marker
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position,11));

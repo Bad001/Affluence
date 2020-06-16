@@ -18,15 +18,14 @@ public class myService extends Service {
     private DatabaseReference reference = database.getReference().child("Marker");
     private HashMap<String, Object> updatedValues = new HashMap<>();
     private Bundle extras;
+    private myMarker marker = new myMarker(-33.852,151.211);
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        extras = intent.getExtras();
-        /*updatedValues.put("latitude",marker.getLatitude());
+        marker = intent.getParcelableExtra("Marker");
+        updatedValues.put("latitude",marker.getLatitude());
         updatedValues.put("longitude",marker.getLongitude());
         reference.child(marker.getId()).child(marker.getId()).updateChildren(updatedValues);
-        reference.updateChildren(updatedValues);
-        */
         return START_STICKY;
     }
 
