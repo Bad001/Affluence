@@ -9,8 +9,14 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Toast;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity {
+
+    private String markerId;
+    private FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private DatabaseReference reference = database.getReference().child("Marker");
 
     @Override
     protected void onStart() {
@@ -38,5 +44,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+    }
+
+    public void getMarkerId(String id) {
+        this.markerId = id;
+    }
+
+    @Override
+    protected void onDestroy() {
+        reference.child(markerId).removeValue();
+        super.onDestroy();
     }
 }

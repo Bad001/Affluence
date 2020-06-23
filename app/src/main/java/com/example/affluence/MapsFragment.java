@@ -65,6 +65,8 @@ public class MapsFragment extends Fragment implements LocationListener {
                 Criteria criteria = new Criteria();
                 Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
                 marker = new myMarker(location.getLatitude(),location.getLongitude());
+                MainActivity mainActivity = (MainActivity) getActivity();
+                mainActivity.getMarkerId(marker.getId());
                 reference.child(marker.getId()).setValue(marker);
             }
         }
@@ -92,7 +94,7 @@ public class MapsFragment extends Fragment implements LocationListener {
                     }
                 }
                 // value = dataSnapshot.getValue(String.class);
-                Toast.makeText(getActivity().getApplicationContext(), String.valueOf(dataSnapshot.getChildrenCount()), Toast.LENGTH_SHORT).show();
+                // Toast.makeText(getActivity().getApplicationContext(), String.valueOf(dataSnapshot.getChildrenCount()), Toast.LENGTH_SHORT).show();
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -157,13 +159,13 @@ public class MapsFragment extends Fragment implements LocationListener {
 
     @Override
     public void onDestroyView() {
-        reference.child(marker.getId()).removeValue();
         super.onDestroyView();
+        reference.child(marker.getId()).removeValue();
     }
 
     @Override
     public void onDestroy() {
-        reference.child(marker.getId()).removeValue();
         super.onDestroy();
+        reference.child(marker.getId()).removeValue();
     }
 }
